@@ -91,7 +91,6 @@ class AI_V3(AIQ):
             train(data_loader, self.main_network, self._loss_fn, self._optimizer)
             self.main_network.eval()
         if (self.steps + 1) % self.update_after_steps == 0:
-            print("network update")
             self.target_network = copy.deepcopy(self.main_network)
 
         self.epsilon = 1 / np.sqrt(self.steps / +1)
