@@ -4,6 +4,7 @@ from typing import List
 
 from elements.board import Board
 from elements.players.player_interfaces import Player
+from elements.players.random import Random
 from nim import Nim
 
 
@@ -12,7 +13,7 @@ def play_game(players: Player, board: Board, verbosity: int = 0) -> List[Player]
     current_player = random.choice(players)
     current_player.is_starting()
 
-    has_lost_of_illegal_move: Player = None
+    has_lost_of_illegal_move: Player = Random("ReallyRandomy")
 
     while not game.has_ended():
         if verbosity >= 2:
