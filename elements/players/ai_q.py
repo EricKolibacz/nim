@@ -47,8 +47,8 @@ class AI(AIQ):
             )
         self._previous_action_state = (copy.deepcopy(board), copy.deepcopy(action))
 
-    def evaluate_result(self, has_won: bool):
-        super().evaluate_result(has_won)
+    def evaluate_result(self, has_won: bool, has_lost_of_illegal_move: bool):
+        super().evaluate_result(has_won, has_lost_of_illegal_move)
         reward = 1 if has_won else -1
         if self._previous_action_state is not None:
             prev_board, prev_action = self._previous_action_state
@@ -68,8 +68,8 @@ class AI_V2(AI):
     def _update_q(self, board: Board, action: Action):
         self._previous_action_state.append((copy.deepcopy(board), copy.deepcopy(action)))
 
-    def evaluate_result(self, has_won: bool):
-        Player.evaluate_result(self, has_won)
+    def evaluate_result(self, has_won: bool, has_lost_of_illegal_move: bool):
+        Player.evaluate_result(self, has_won, has_lost_of_illegal_move)
         reward = 1 if has_won else -1
 
         prev_board, prev_action = self._previous_action_state[-1]

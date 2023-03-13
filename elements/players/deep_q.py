@@ -57,12 +57,12 @@ class AI_V3(AIQ):
 
         self.replay_buffer.append(SARS(copy.deepcopy(board), copy.deepcopy(action), 0))
 
-    def evaluate_result(self, has_won: bool):
-        Player.evaluate_result(self, has_won)
-        reward = 1 if has_won else -1
+    def evaluate_result(self, has_won: bool, has_lost_of_illegal_move):
+        Player.evaluate_result(self, has_won, has_lost_of_illegal_move)
+        reward = 1 if has_won else -1 if not has_lost_of_illegal_move else -4
 
         self.replay_buffer[-1].reward = reward
-        if self.has_lost_of_illegal_move:
+        if has_lost_of_illegal_move:
             self.replay_buffer[-1].new_board = None
         # if self.replay_buffer.count(self.replay_buffer[-1]) > 1:
         #    self.replay_buffer.pop()
