@@ -28,7 +28,7 @@ class AI_V3(AIQ):
         self.target_network = copy.deepcopy(self.main_network)
 
         self._loss_fn = nn.HuberLoss(delta=1.0)
-        self._optimizer = optim.Adam(self.main_network.parameters(), lr=alpha)
+        self._optimizer = optim.SGD(self.main_network.parameters(), lr=alpha)
         self.replay_buffer: List[SARS] = []
 
         self.n_star = 1
@@ -40,8 +40,9 @@ class AI_V3(AIQ):
 
     def _get_possible_actions(self, board: Board) -> Action:
         with no_grad():
-            actions = self.main_network(torch.tensor(board.binary_reprensation, dtype=torch.float))
-        return [self._get_action_from_index(i, action) for i, action in enumerate(actions)]
+            q_values = self.main_network(torch.tensor(board.binary_reprensation, dtype=torch.float))
+            actions: list[Action] = [self._get_action_from_index(i, action) for i, action in enumerate(q_values)]
+        return [action for action in actions if board.position[action.pile] - action.no_of_stones >= 0]
 
     def _get_action_from_index(self, i: int, q_value: float) -> List[int]:
         number_of_stones = i % self.max_number_of_stones + 1
@@ -57,13 +58,11 @@ class AI_V3(AIQ):
 
         self.replay_buffer.append(SARS(copy.deepcopy(board), copy.deepcopy(action), 0))
 
-    def evaluate_result(self, has_won: bool, has_lost_of_illegal_move):
-        Player.evaluate_result(self, has_won, has_lost_of_illegal_move)
-        reward = 1 if has_won else -1 if not has_lost_of_illegal_move else -4
+    def evaluate_result(self, has_won: bool):
+        Player.evaluate_result(self, has_won)
+        reward = 1 if has_won else -1
         if self.replay_buffer:
             self.replay_buffer[-1].reward = reward
-            if has_lost_of_illegal_move:
-                self.replay_buffer[-1].new_board = None
             # if self.replay_buffer.count(self.replay_buffer[-1]) > 1:
             #    self.replay_buffer.pop()
             self.replay_buffer = self.replay_buffer[-self.buffer_length :]

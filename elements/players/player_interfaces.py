@@ -13,7 +13,6 @@ class Player(ABC):
         self.victories = 0
         self.defeats = 0
         self.started = 0
-        self.lost_of_illegal_move = 0
 
     @abstractmethod
     def choose_next_action(self, board: List) -> Action:
@@ -26,13 +25,11 @@ class Player(ABC):
             List: number of stones, pile number
         """
 
-    def evaluate_result(self, has_won: bool, has_lost_of_illegal_move: bool):
+    def evaluate_result(self, has_won: bool):
         if has_won:
             self.victories += 1
         else:
             self.defeats += 1
-        if has_lost_of_illegal_move:
-            self.lost_of_illegal_move += 1
 
     def is_starting(self):
         self.started += 1
