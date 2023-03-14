@@ -60,42 +60,42 @@ class AI_V3(AIQ):
     def evaluate_result(self, has_won: bool, has_lost_of_illegal_move):
         Player.evaluate_result(self, has_won, has_lost_of_illegal_move)
         reward = 1 if has_won else -1 if not has_lost_of_illegal_move else -4
+        if self.replay_buffer:
+            self.replay_buffer[-1].reward = reward
+            if has_lost_of_illegal_move:
+                self.replay_buffer[-1].new_board = None
+            # if self.replay_buffer.count(self.replay_buffer[-1]) > 1:
+            #    self.replay_buffer.pop()
+            self.replay_buffer = self.replay_buffer[-self.buffer_length :]
 
-        self.replay_buffer[-1].reward = reward
-        if has_lost_of_illegal_move:
-            self.replay_buffer[-1].new_board = None
-        # if self.replay_buffer.count(self.replay_buffer[-1]) > 1:
-        #    self.replay_buffer.pop()
-        self.replay_buffer = self.replay_buffer[-self.buffer_length :]
+            if self.batch_size < len(self.replay_buffer):
+                input_batch = random.choices(self.replay_buffer, k=self.batch_size)
+                x, y, action_ids = [], [], []
+                for sars in input_batch:
+                    if sars.new_board is not None:
+                        self.target_network.eval()
+                        actions = (
+                            self.target_network(torch.tensor(sars.new_board.binary_reprensation, dtype=torch.float))
+                            .detach()
+                            .numpy()
+                        )
+                        max_q = max(actions)
+                    else:
+                        max_q = 0
+                    x.append(torch.tensor(sars.board.binary_reprensation, dtype=torch.float).detach().numpy())
+                    y.append(sars.reward + self.gamma * max_q)
+                    action_ids.append(sars.action.pile * self.max_number_of_stones + sars.action.no_of_stones - 1)
 
-        if self.batch_size < len(self.replay_buffer):
-            input_batch = random.choices(self.replay_buffer, k=self.batch_size)
-            x, y, action_ids = [], [], []
-            for sars in input_batch:
-                if sars.new_board is not None:
-                    self.target_network.eval()
-                    actions = (
-                        self.target_network(torch.tensor(sars.new_board.binary_reprensation, dtype=torch.float))
-                        .detach()
-                        .numpy()
-                    )
-                    max_q = max(actions)
-                else:
-                    max_q = 0
-                x.append(torch.tensor(sars.board.binary_reprensation, dtype=torch.float).detach().numpy())
-                y.append(sars.reward + self.gamma * max_q)
-                action_ids.append(sars.action.pile * self.max_number_of_stones + sars.action.no_of_stones - 1)
+                data_loader = create_dataloader(np.array(x), np.array(y), np.array(action_ids), self.batch_size)
+                self.main_network.train()
+                train(data_loader, self.main_network, self._loss_fn, self._optimizer)
+                self.main_network.eval()
+            if (self.steps + 1) % self.update_after_steps == 0:
+                self.target_network = copy.deepcopy(self.main_network)
 
-            data_loader = create_dataloader(np.array(x), np.array(y), np.array(action_ids), self.batch_size)
-            self.main_network.train()
-            train(data_loader, self.main_network, self._loss_fn, self._optimizer)
-            self.main_network.eval()
-        if (self.steps + 1) % self.update_after_steps == 0:
-            self.target_network = copy.deepcopy(self.main_network)
+            self.epsilon = 1 / np.sqrt(self.steps / +1)
 
-        self.epsilon = 1 / np.sqrt(self.steps / +1)
-
-        self.steps += 1
+            self.steps += 1
         # print(self.replay_buffer)
         # for item in self.replay_buffer:
         #    print(item)
