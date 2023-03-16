@@ -86,7 +86,7 @@ class AI_V3(AIQ):
                     if sars.new_board is not None:
                         self.target_network.eval()
                         actions = self.target_network(sars.new_board.position).detach().numpy()
-                        max_q = max(actions)
+                        max_q = max([q_value for _, q_value in self._extract_legal_moves(sars.new_board, actions)])
                     else:
                         max_q = 0
                     x.append(sars.board)
