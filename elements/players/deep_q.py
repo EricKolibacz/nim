@@ -6,11 +6,12 @@ from typing import List
 import numpy as np
 import torch
 from torch import nn, no_grad, optim
+from torch.utils.data import DataLoader
 
 from elements.action import Action
 from elements.board import Board
 from elements.players.player_interfaces import AIQ, Player
-from neural_network import DEVICE, NeuralNetwork, create_dataloader, train
+from neural_network import DEVICE, BoardDataSet, NeuralNetwork, train
 
 
 class AI_V3(AIQ):
@@ -20,11 +21,7 @@ class AI_V3(AIQ):
     def __init__(self, name, board: Board, alpha, gamma, epsilon) -> None:
         super().__init__(name, alpha, gamma, epsilon)
         self.max_number_of_stones = max(board.position)
-        self.input_size = int(np.log2(self.max_number_of_stones) + 1) * board.no_of_piles
-        self.main_network: NeuralNetwork = NeuralNetwork(
-            self.input_size,
-            self.max_number_of_stones * board.no_of_piles,
-        ).to(DEVICE)
+        self.main_network: NeuralNetwork = NeuralNetwork(board).to(DEVICE)
         self.target_network = copy.deepcopy(self.main_network)
 
         self._loss_fn = nn.HuberLoss(delta=1.0)
@@ -40,9 +37,24 @@ class AI_V3(AIQ):
 
     def _get_possible_actions(self, board: Board) -> Action:
         with no_grad():
-            q_values = self.main_network(torch.tensor(board.binary_reprensation, dtype=torch.float))
-            actions: list[Action] = [self._get_action_from_index(i, action) for i, action in enumerate(q_values)]
-        return [action for action in actions if board.position[action.pile] - action.no_of_stones >= 0]
+            q_values = self.main_network(board.position)
+            actions: list[Action] = [
+                self._get_action_from_index(i, action) for i, action in self._extract_legal_moves(board, q_values)
+            ]
+
+        return actions
+
+    def _extract_legal_moves(self, board: Board, q_values) -> List[int]:
+        valid_q_values = []
+        indices = []
+        for i, q_value in enumerate(q_values):
+            number_of_stones = i % self.max_number_of_stones + 1
+            pile = int(i / self.max_number_of_stones)
+            if board.position[pile] - number_of_stones >= 0:
+                valid_q_values.append(q_value)
+                indices.append(i)
+        valid_q_values = torch.nn.functional.softmax(torch.Tensor(valid_q_values))
+        return zip(indices, valid_q_values)
 
     def _get_action_from_index(self, i: int, q_value: float) -> List[int]:
         number_of_stones = i % self.max_number_of_stones + 1
@@ -73,19 +85,15 @@ class AI_V3(AIQ):
                 for sars in input_batch:
                     if sars.new_board is not None:
                         self.target_network.eval()
-                        actions = (
-                            self.target_network(torch.tensor(sars.new_board.binary_reprensation, dtype=torch.float))
-                            .detach()
-                            .numpy()
-                        )
+                        actions = self.target_network(sars.new_board.position).detach().numpy()
                         max_q = max(actions)
                     else:
                         max_q = 0
-                    x.append(torch.tensor(sars.board.binary_reprensation, dtype=torch.float).detach().numpy())
+                    x.append(sars.board)
                     y.append(sars.reward + self.gamma * max_q)
                     action_ids.append(sars.action.pile * self.max_number_of_stones + sars.action.no_of_stones - 1)
 
-                data_loader = create_dataloader(np.array(x), np.array(y), np.array(action_ids), self.batch_size)
+                data_loader = DataLoader(BoardDataSet(x, y, action_ids), self.batch_size)
                 self.main_network.train()
                 train(data_loader, self.main_network, self._loss_fn, self._optimizer)
                 self.main_network.eval()
