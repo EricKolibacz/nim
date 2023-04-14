@@ -25,7 +25,6 @@ def play_game(players: Player, board: Board, verbosity: int = 0) -> List[Player]
             game.remove(action)
         except ValueError as error_message:
             print("Encountered Error: ", error_message)
-            input()
         else:
             current_player = players[1] if current_player == players[0] else players[0]
             if verbosity >= 2:
