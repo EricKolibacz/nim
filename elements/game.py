@@ -5,7 +5,7 @@ from typing import List
 from elements.board import Board
 from elements.players.player_interfaces import Player
 from elements.players.random import Random
-from nim import Nim
+from elements.nim import Nim
 
 
 def play_game(players: Player, board: Board, verbosity: int = 0) -> List[Player]:
