@@ -1,3 +1,4 @@
+"""Main script to train the RL methods and play the game"""
 from copy import deepcopy
 
 from elements.board import Board

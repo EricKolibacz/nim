@@ -2,6 +2,8 @@
 
 
 class Action:
+    """Class to create nim action objects"""
+
     def __init__(self, no_of_stones: int, pile: int, q_value: int = None) -> None:
         if no_of_stones < 0:
             raise ValueError("Number of stones should be greater-equal 1.")

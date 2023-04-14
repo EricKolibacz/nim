@@ -1,8 +1,9 @@
 """Defining board positions and related information"""
-import torch
 
 
 class Board:
+    """Class to create Board objects"""
+
     def __init__(self, position: list) -> None:
         self.position = position
         self.no_of_piles = len(position)

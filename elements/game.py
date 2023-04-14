@@ -1,14 +1,15 @@
+"""Module containing the function to play the game"""
 import copy
 import random
 from typing import List
 
 from elements.board import Board
-from elements.players.player_interfaces import Player
-from elements.players.random import Random
 from elements.nim import Nim
+from elements.players.player_interfaces import Player
 
 
 def play_game(players: Player, board: Board, verbosity: int = 0) -> List[Player]:
+    """Function to play the game"""
     game = Nim(board)
     current_player = random.choice(players)
     current_player.is_starting()
