@@ -46,15 +46,12 @@ class AI_V3(AIQ):
 
     def _extract_legal_moves(self, board: Board, q_values) -> List[int]:
         valid_q_values = []
-        indices = []
         for i, q_value in enumerate(q_values):
             number_of_stones = i % self.max_number_of_stones + 1
             pile = int(i / self.max_number_of_stones)
             if board.position[pile] - number_of_stones >= 0:
-                valid_q_values.append(q_value)
-                indices.append(i)
-        valid_q_values = torch.nn.functional.softmax(torch.Tensor(valid_q_values))
-        return zip(indices, valid_q_values)
+                valid_q_values.append([i, q_value])
+        return valid_q_values
 
     def _get_action_from_index(self, i: int, q_value: float) -> List[int]:
         number_of_stones = i % self.max_number_of_stones + 1
