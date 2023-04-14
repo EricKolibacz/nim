@@ -3,8 +3,8 @@ import copy
 import random
 from typing import List
 
-from elements.board import Board
-from elements.nim import Nim
+from elements.nim.board import Board
+from elements.nim.nim import Nim
 from elements.players.player_interfaces import Player
 
 

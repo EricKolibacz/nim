@@ -1,7 +1,7 @@
 """Main script to train the RL methods and play the game"""
 from copy import deepcopy
 
-from elements.board import Board
+from elements.nim.board import Board
 from elements.play_game import play_game
 from elements.players.ai_q import AI, AI_V2
 from elements.players.deep_q import AI_V3

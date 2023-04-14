@@ -7,7 +7,7 @@ import torch
 from torch import Tensor, nn
 from torch.utils.data import DataLoader, Dataset
 
-from elements.board import Board
+from elements.nim.board import Board
 
 DEVICE = "cpu"
 

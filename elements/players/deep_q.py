@@ -4,14 +4,13 @@ import random
 from typing import List
 
 import numpy as np
-import torch
 from torch import nn, no_grad, optim
 from torch.utils.data import DataLoader
 
-from elements.action import Action
-from elements.board import Board
-from elements.players.player_interfaces import AIQ, Player
+from elements.nim.action import Action
+from elements.nim.board import Board
 from elements.players.neural_network import DEVICE, BoardDataSet, NeuralNetwork, train
+from elements.players.player_interfaces import AIQ, Player
 
 
 class AI_V3(AIQ):

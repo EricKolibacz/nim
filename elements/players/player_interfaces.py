@@ -3,8 +3,8 @@ import random
 from abc import ABC, abstractmethod
 from typing import List
 
-from elements.action import Action
-from elements.board import Board
+from elements.nim.action import Action
+from elements.nim.board import Board
 
 
 class Player(ABC):

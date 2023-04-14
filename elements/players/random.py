@@ -4,8 +4,8 @@
 import random
 from typing import List
 
-from elements.action import Action
-from elements.board import Board
+from elements.nim.action import Action
+from elements.nim.board import Board
 from elements.players.player_interfaces import Player
 
 
