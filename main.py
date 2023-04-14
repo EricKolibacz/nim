@@ -2,7 +2,7 @@
 from copy import deepcopy
 
 from elements.board import Board
-from elements.game import play_game
+from elements.play_game import play_game
 from elements.players.ai_q import AI, AI_V2
 from elements.players.deep_q import AI_V3
 from elements.players.human import Human
