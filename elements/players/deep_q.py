@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader
 from elements.action import Action
 from elements.board import Board
 from elements.players.player_interfaces import AIQ, Player
-from neural_network import DEVICE, BoardDataSet, NeuralNetwork, train
+from elements.players.neural_network import DEVICE, BoardDataSet, NeuralNetwork, train
 
 
 class AI_V3(AIQ):
