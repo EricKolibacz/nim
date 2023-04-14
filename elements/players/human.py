@@ -13,6 +13,7 @@ class Human(Player):
             no_of_stones = int(input("How many stones?  "))
             try:
                 action = Action(no_of_stones, pile)
+                is_inputing = False
             except ValueError as excpetion:
                 print(excpetion)
 
