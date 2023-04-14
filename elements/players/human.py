@@ -1,6 +1,6 @@
 """Defines the human player"""
-from argparse import Action
 
+from elements.action import Action
 from elements.board import Board
 from elements.players.player_interfaces import Player
 
